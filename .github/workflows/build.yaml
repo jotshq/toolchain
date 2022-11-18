@@ -33,7 +33,7 @@ jobs:
             name: jots-toolchain-x86_64-pc-windows-msvc-${{ github.ref_name }}.zip
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
               submodules: recursive
       - name: Setup Rust toolchain
