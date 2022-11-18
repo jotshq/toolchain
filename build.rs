@@ -3,7 +3,10 @@ use anyhow::Result;
 use cmake;
 
 use std::io::ErrorKind;
+
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
+
 use std::path::PathBuf;
 #[cfg(feature = "build-tensorflow")]
 use std::process::Command;
@@ -53,8 +56,15 @@ fn toolchain_dir() -> PathBuf {
 //     });
 fn set_w_permission(path: PathBuf) -> Result<()> {
     let mut perms = fs::metadata(&path)?.permissions();
-    // perms.set_readonly(false);
-    perms.set_mode(0o755);
+
+    #[cfg(unix)]
+    {
+        perms.set_mode(0o755);
+    }
+    #[cfg(not(unix))]
+    {
+        perms.set_readonly(false);
+    }
     fs::set_permissions(&path, perms)?;
 
     Ok(())

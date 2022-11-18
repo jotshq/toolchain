@@ -7,6 +7,16 @@
 - cmake
 - openblas
 
+## Windows
+
+Install chocolatey
+
+```bash
+choco install bazelisk
+choco install cmake
+choco install rustup
+```
+
 ## Build
 
 ```sh
