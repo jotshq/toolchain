@@ -25,9 +25,9 @@ jobs:
           # - target: aarch64-apple-darwin
           #   os: macos-latest
           #   name: jots-toolchain-aarch64-apple-darwin-${{ github.ref_name }}.tgz
-          - target: aarch64-pc-windows-msvc
-            os: windows-latest
-            name: jots-toolchain-x86_64-pc-windows-msvc-${{ github.ref_name }}.zip
+          # - target: aarch64-pc-windows-msvc
+          #   os: windows-latest
+          #   name: jots-toolchain-x86_64-pc-windows-msvc-${{ github.ref_name }}.zip
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             name: jots-toolchain-x86_64-pc-windows-msvc-${{ github.ref_name }}.zip
@@ -43,7 +43,13 @@ jobs:
           toolchain: stable
           target: ${{ matrix.target }}
 
+      - name: Restore artifacts, or setup vcpkg (do not install any package)
+        if: matrix.os == 'windows-latest'
+        uses: lukka/run-vcpkg@v10
+        vcpkgDirectory: '${{ github.workspace }}/src/vcpkg'
+
       - uses: bazelbuild/setup-bazelisk@v2
+
       - name: Mount bazel cache  # Optional
         uses: actions/cache@v3
         with:
@@ -56,6 +62,7 @@ jobs:
           command: build
           args: |
             --release --target ${{ matrix.target }} --all-features
+            
       # - name: Post-build (Windows)
       #   if: matrix.os == 'windows-latest'
       #   run: |
