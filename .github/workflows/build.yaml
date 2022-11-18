@@ -46,7 +46,8 @@ jobs:
       - name: Restore artifacts, or setup vcpkg (do not install any package)
         if: matrix.os == 'windows-latest'
         uses: lukka/run-vcpkg@v10
-        vcpkgDirectory: '${{ github.workspace }}/src/vcpkg'
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/src/vcpkg'
 
       - uses: bazelbuild/setup-bazelisk@v2
 
@@ -62,7 +63,7 @@ jobs:
           command: build
           args: |
             --release --target ${{ matrix.target }} --all-features
-            
+
       # - name: Post-build (Windows)
       #   if: matrix.os == 'windows-latest'
       #   run: |
