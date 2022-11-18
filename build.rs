@@ -2,6 +2,7 @@ use anyhow::Result;
 #[cfg(feature = "build-faiss")]
 use cmake;
 
+use std::io::ErrorKind;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 #[cfg(feature = "build-tensorflow")]
@@ -99,19 +100,27 @@ fn build_faiss() {
 #[cfg(feature = "build-tensorflow")]
 fn build_tensorflow() {
     let tensorflow_src_dir = manifest_dir().join("src/tensorflow");
-    // let dst = out_dir().join("tf-build");
-    Command::new("bazel")
+
+    // check all tflite targets:
+    // bazel query "//tensorflow/lite/..."
+
+    let status = Command::new("bazel")
         .current_dir(&tensorflow_src_dir)
         .args([
             // format!("--output_base={}", dst.display()).as_str(),
             "build",
-            "//tensorflow/lite:libtensorflowlite.dylib",
+            "//tensorflow/lite/c:libtensorflowlite_c.dylib", // "//tensorflow/lite:libtensorflowlite.dylib",
+            "--define",
+            "tflite_with_xnnpack=true",
         ])
-        .spawn()
+        .status()
         .unwrap();
+    if !status.success() {
+        panic!("error: {}", status);
+    }
     let lib = install_lib(
-        tensorflow_src_dir.join("bazel-bin/tensorflow/lite"),
-        "tensorflowlite",
+        tensorflow_src_dir.join("bazel-bin/tensorflow/lite/c"),
+        "tensorflowlite_c",
     );
     set_w_permission(lib).unwrap();
 
