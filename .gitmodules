@@ -4,3 +4,6 @@
 [submodule "src/tensorflow"]
 	path = src/tensorflow
 	url = https://github.com/tensorflow/tensorflow
+[submodule "src/vcpkg"]
+	path = src/vcpkg
+	url = https://github.com/Microsoft/vcpkg.git

@@ -118,7 +118,7 @@ fn build_faiss() {
         build_config.define(
             "CMAKE_TOOLCHAIN_FILE",
             &manifest_dir()
-                .join("../../../vcpkg")
+                .join("src/vcpkg")
                 .join("scripts/buildsystems/vcpkg.cmake")
                 .canonicalize()
                 .unwrap(),
