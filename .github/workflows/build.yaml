@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    branches: main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-upload:
+    name: Build and Upload Binaries
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # - target: x86_64-unknown-linux-gnu
+          #   os: ubuntu-18.04
+          #   name: jots-toolchain-x86_64-unknown-linux-gnu-${{ github.ref_name }}.tgz
+          # - target: x86_64-apple-darwin
+          #   os: macos-latest
+          #   name: jots-toolchain-x86_64-apple-darwin-${{ github.ref_name }}.tgz
+          # - target: aarch64-apple-darwin
+          #   os: macos-latest
+          #   name: jots-toolchain-aarch64-apple-darwin-${{ github.ref_name }}.tgz
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
+            name: jots-toolchain-x86_64-pc-windows-msvc-${{ github.ref_name }}.zip
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            name: jots-toolchain-x86_64-pc-windows-msvc-${{ github.ref_name }}.zip
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+              submodules: recursive
+      - name: Setup Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: ${{ matrix.target }}
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: |
+            --release --target ${{ matrix.target }} --all-features
+      # - name: Post-build (Windows)
+      #   if: matrix.os == 'windows-latest'
+      #   run: |
+      #     cd target/${{ matrix.target }}/release
+      #     7z a ../../../${{ matrix.name }} flutter_rust_bridge_codegen.exe
+      #     cd -
+      # - name: Post-build (*nix)
+      #   if: matrix.os != 'windows-latest'
+      #   run: |
+      #     cd target/${{ matrix.target }}/release
+      #     tar czvf ../../../${{ matrix.name }} flutter_rust_bridge_codegen
+      #     cd -
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.name }}
+          path: ../../prebuilt/${{ matrix.target }}
