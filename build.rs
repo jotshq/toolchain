@@ -60,19 +60,32 @@ fn set_w_permission(path: PathBuf) -> Result<()> {
     Ok(())
 }
 
-fn install_lib(path: PathBuf, name: &str) -> PathBuf {
-    let libname = format!("lib{}.dylib", name);
-    let src = path.join(&libname);
-    let dst = toolchain_dir().join(&libname);
+fn install_lib(path: PathBuf, name: &str) -> Vec<PathBuf> {
+    let exts = if cfg!(windows) {
+        vec![".dll", ".lib"]
+    } else if cfg!(macos) {
+        vec!["dylib"]
+    } else {
+        vec!["so"]
+    };
 
-    println!("install_lib: {} - {}", src.display(), dst.display());
+    let mut res = vec![];
 
-    if src.exists() == false {
-        panic!("Cannot find: {}", src.display());
+    for ext in exts {
+        let libname = format!("lib{}.{}", name, ext);
+        let src = path.join(&libname);
+        let dst = toolchain_dir().join(&libname);
+
+        println!("install_lib: {} - {}", src.display(), dst.display());
+
+        if src.exists() == false {
+            panic!("Cannot find: {}", src.display());
+        }
+        std::fs::copy(&src, &dst).unwrap();
+        res.push(dst)
     }
-    std::fs::copy(&src, &dst).unwrap();
 
-    dst
+    res
 }
 
 #[cfg(feature = "build-faiss")]
@@ -118,11 +131,13 @@ fn build_tensorflow() {
     if !status.success() {
         panic!("error: {}", status);
     }
-    let lib = install_lib(
+    let libs = install_lib(
         tensorflow_src_dir.join("bazel-bin/tensorflow/lite/c"),
         "tensorflowlite_c",
     );
-    set_w_permission(lib).unwrap();
+    for lib in libs {
+        set_w_permission(lib).unwrap();
+    }
 
     // bazel --output_user_root=/tmp/bazel build x/y:z
 }
