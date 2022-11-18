@@ -48,7 +48,7 @@ jobs:
         uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/src/vcpkg'
-          vcpkgInstall: true
+          runVcpkgInstall: true
 
       - uses: bazelbuild/setup-bazelisk@v2
 
