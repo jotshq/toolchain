@@ -42,6 +42,14 @@ jobs:
           profile: minimal
           toolchain: stable
           target: ${{ matrix.target }}
+
+      - uses: bazelbuild/setup-bazelisk@v2
+      - name: Mount bazel cache  # Optional
+        uses: actions/cache@v3
+        with:
+          path: "~/.cache/bazel"
+          key: bazel
+
       - name: Build
         uses: actions-rs/cargo@v1
         with:
