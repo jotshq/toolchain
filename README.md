@@ -3,18 +3,25 @@
 ## Requirement
 
 - bazelisk
-- libomp
 - cmake
+- libomp
 - openblas
+- python
 
 ## Windows
 
 Install chocolatey
+Install rustup
+Install cmake
+Install python
 
 ```bash
+#faiss:
+vcpkg install openblas
+#tensorflow:
+pip install numpy
 choco install bazelisk
-choco install cmake
-choco install rustup
+choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
 ```
 
 ## Build

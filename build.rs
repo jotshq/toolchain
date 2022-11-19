@@ -113,6 +113,17 @@ fn build_faiss() {
     build_config.define("BUILD_SHARED_LIBS", "ON");
     build_config.define("FAISS_ENABLE_PYTHON", "OFF");
     build_config.define("BUILD_TESTING", "OFF");
+    #[cfg(windows)]
+    {
+        build_config.define(
+            "CMAKE_TOOLCHAIN_FILE",
+            &manifest_dir()
+                .join("../../../vcpkg")
+                .join("scripts/buildsystems/vcpkg.cmake")
+                .canonicalize()
+                .unwrap(),
+        );
+    }
 
     let dst = build_config.build();
 
@@ -126,13 +137,19 @@ fn build_tensorflow() {
 
     // check all tflite targets:
     // bazel query "//tensorflow/lite/..."
-
+    let target = if cfg!(windows) {
+        "//tensorflow/lite/c:tensorflowlite_c.dll"
+    } else if cfg!(macos) {
+        "//tensorflow/lite/c:libtensorflowlite_c.dylib"
+    } else {
+        "//tensorflow/lite/c:libtensorflowlite_c.so"
+    };
     let status = Command::new("bazel")
         .current_dir(&tensorflow_src_dir)
         .args([
             // format!("--output_base={}", dst.display()).as_str(),
             "build",
-            "//tensorflow/lite/c:libtensorflowlite_c.dylib", // "//tensorflow/lite:libtensorflowlite.dylib",
+            target, // "//tensorflow/lite:libtensorflowlite.dylib",
             "--define",
             "tflite_with_xnnpack=true",
         ])
