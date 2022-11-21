@@ -73,7 +73,7 @@ fn set_w_permission(path: PathBuf) -> Result<()> {
 fn install_lib(path: PathBuf, name: &str) -> Vec<PathBuf> {
     let exts = if cfg!(windows) {
         vec![".dll", ".lib"]
-    } else if cfg!(macos) {
+    } else if cfg!(target_os = "macos") {
         vec!["dylib"]
     } else {
         vec!["so"]
@@ -139,7 +139,7 @@ fn build_tensorflow() {
     // bazel query "//tensorflow/lite/..."
     let target = if cfg!(windows) {
         "//tensorflow/lite/c:tensorflowlite_c.dll"
-    } else if cfg!(macos) {
+    } else if cfg!(target_os = "macos") {
         "//tensorflow/lite/c:libtensorflowlite_c.dylib"
     } else {
         "//tensorflow/lite/c:libtensorflowlite_c.so"
